@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"jenkins/shell"
 	"log"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -34,11 +35,63 @@ to quickly create a Cobra application.`,
 			len(viper.GetString("jenkins.token")) > 0 {
 			fmt.Println("build called")
 
+			// 1. 本地查询
+			var list []string
+
+			jobs := viper.GetStringSlice("jenkins.jobs")
+			if jobs == nil {
+				// 3. 本地未命中更新
+
+				cmdStr := "java -jar jenkins-cli.jar -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " list-jobs"
+				res, err := shell.Exec(cmdStr)
+
+				if err != nil {
+					log.Fatalf("found the job failure: %s", err)
+				}
+
+				jobs = strings.Split(strings.Trim(res, "\n"), "\n")
+				if len(jobs) > 0 {
+
+					viper.Set("jenkins.jobs", jobs)
+
+					err := viper.WriteConfig()
+					if err != nil {
+						fmt.Println(err)
+					}
+				}
+			} else {
+				//TODO: 定时更新
+			}
+
+			for _, v := range jobs {
+				if v == project {
+					list = []string{v}
+					break
+				}
+				if strings.Contains(v, project) {
+					list = append(list, v)
+				}
+			}
+
+			if list == nil {
+				log.Fatalf("can not found the job : %s", project)
+				return
+			}
+
+			var job string
+			if len(list) == 1 {
+				job = list[0]
+			} else {
+				fmt.Println(list)
+				//TODO: 交互选择
+				log.Fatalf("can not found the job : %s", project)
+			}
+
 			var cmdStr string
 			if verbose {
-				cmdStr = "java -jar jenkins-cli.jar -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " build " + project + " -p branch=origin/" + branch + " -f -v"
+				cmdStr = "java -jar jenkins-cli.jar -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " build " + job + " -p branch=origin/" + branch + " -f -v"
 			} else {
-				cmdStr = "java -jar jenkins-cli.jar -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " build " + project + " -p branch=origin/" + branch
+				cmdStr = "java -jar jenkins-cli.jar -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " build " + job + " -p branch=origin/" + branch
 			}
 
 			if !force {
@@ -48,7 +101,7 @@ to quickly create a Cobra application.`,
 			fmt.Println(cmdStr)
 			res, err := shell.Exec(cmdStr)
 			if err != nil {
-				log.Fatalf("jenkins build %s err: %s", project, err)
+				log.Fatalf("jenkins build %s err: %s", job, err)
 				return
 			}
 			fmt.Println(res)

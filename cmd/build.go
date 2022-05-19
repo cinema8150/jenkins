@@ -15,6 +15,8 @@ import (
 
 var project string
 var branch string
+var verbose bool
+var force bool
 
 // buildCmd represents the build command
 var buildCmd = &cobra.Command{
@@ -31,7 +33,17 @@ to quickly create a Cobra application.`,
 			len(viper.GetString("jenkins.user")) > 0 &&
 			len(viper.GetString("jenkins.token")) > 0 {
 			fmt.Println("build called")
-			cmdStr := "java -jar jenkins-cli.jar -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " build " + project + " -p branch=origin/" + branch
+
+			var cmdStr string
+			if verbose {
+				cmdStr = "java -jar jenkins-cli.jar -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " build " + project + " -p branch=origin/" + branch + " -f -v"
+			} else {
+				cmdStr = "java -jar jenkins-cli.jar -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " build " + project + " -p branch=origin/" + branch
+			}
+
+			if !force {
+				cmdStr = cmdStr + " -c"
+			}
 
 			fmt.Println(cmdStr)
 			res, err := shell.Exec(cmdStr)
@@ -50,11 +62,15 @@ to quickly create a Cobra application.`,
 
 func init() {
 
-	buildCmd.Flags().StringVar(&project, "project", "", "input server project")
+	buildCmd.Flags().StringVarP(&project, "project", "p", "", "input server project")
 	buildCmd.MarkFlagRequired("project")
 
-	buildCmd.Flags().StringVar(&branch, "branch", "", "input server project")
+	buildCmd.Flags().StringVarP(&branch, "branch", "b", "", "input server project")
 	buildCmd.MarkFlagRequired("branch")
+
+	buildCmd.Flags().BoolVarP(&force, "force", "f", false, "Not check for SCM changes before starting the build")
+
+	buildCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Prints out the console output of the build.")
 
 	rootCmd.AddCommand(buildCmd)
 

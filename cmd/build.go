@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"jenkins/shell"
 	"log"
+	"path"
 	"strings"
 
 	"github.com/manifoldco/promptui"
@@ -19,6 +20,8 @@ var project string
 var branch string
 var verbose bool
 var force bool
+
+var AppName = "jenkins-cli"
 
 // buildCmd represents the build command
 var buildCmd = &cobra.Command{
@@ -34,7 +37,27 @@ to quickly create a Cobra application.`,
 		if len(viper.GetString("jenkins.url")) > 0 &&
 			len(viper.GetString("jenkins.user")) > 0 &&
 			len(viper.GetString("jenkins.token")) > 0 {
-			fmt.Println("build called")
+
+			var jarFile = viper.GetString("jenkins.jar")
+			//TODO: bug 升级版本后地址会发生变更
+			if len(jarFile) == 0 {
+
+				info, err := shell.Exec("brew info " + AppName)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				infos := strings.Split(info, "\n")
+				for _, v := range infos {
+					if strings.Contains(v, "/"+AppName+"/") {
+						jarFile = path.Join(strings.Split(v, " ")[0], "libexec/bin/jenkins-cli.jar")
+						viper.Set("jenkins.jar", jarFile)
+						viper.WriteConfig()
+						break
+					}
+				}
+
+			}
 
 			// 1. 本地查询
 			var list []string
@@ -44,11 +67,11 @@ to quickly create a Cobra application.`,
 				//TODO: 完善交互，如：loading……
 				fmt.Println("query jenkons job")
 				// 3. 本地未命中更新
-				cmdStr := "java -jar jenkins-cli.jar -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " list-jobs"
+				cmdStr := "java -jar " + jarFile + " -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " list-jobs"
 				res, err := shell.Exec(cmdStr)
 
 				if err != nil {
-					log.Fatalf("found the job failure: %s", err)
+					log.Fatalln(err)
 				}
 
 				jobs = strings.Split(strings.Trim(res, "\n"), "\n")
@@ -103,9 +126,9 @@ to quickly create a Cobra application.`,
 
 			var cmdStr string
 			if verbose {
-				cmdStr = "java -jar jenkins-cli.jar -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " build " + job + " -p branch=origin/" + branch + " -f -v"
+				cmdStr = "java -jar " + jarFile + " -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " build " + job + " -p branch=origin/" + branch + " -f -v"
 			} else {
-				cmdStr = "java -jar jenkins-cli.jar -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " build " + job + " -p branch=origin/" + branch
+				cmdStr = "java -jar " + jarFile + " -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " build " + job + " -p branch=origin/" + branch
 			}
 
 			if !force {

@@ -16,7 +16,7 @@ func LoadConfig() (string, error) {
 	}
 
 	var (
-		cfgFileFolder = path.Join(home, ".cinema8150")
+		cfgFileFolder = path.Join(home, ".cinema8150/jenkins-build")
 		cfgFileName   = ".jenkins"
 		cfgFileType   = "yaml"
 		cfgFilePath   = path.Join(cfgFileFolder, cfgFileName+"."+cfgFileType)

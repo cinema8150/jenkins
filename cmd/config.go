@@ -14,6 +14,7 @@ import (
 var url string
 var user string
 var token string
+var jarfile string
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
@@ -38,6 +39,10 @@ var configCmd = &cobra.Command{
 			viper.Set("jenkins.token", token)
 		}
 
+		if len(jarfile) > 0 {
+			viper.Set("jenkins.jar", jarfile)
+		}
+
 		err := viper.WriteConfig()
 		if err != nil {
 			fmt.Println(err)
@@ -53,6 +58,8 @@ func init() {
 	configCmd.Flags().StringVar(&user, "user", "", "input your name")
 
 	configCmd.Flags().StringVar(&token, "token", "", "input your token")
+
+	configCmd.Flags().StringVar(&jarfile, "jarfile", "", "input your jarfile")
 
 	rootCmd.AddCommand(configCmd)
 

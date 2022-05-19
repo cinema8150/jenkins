@@ -10,6 +10,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -40,8 +41,9 @@ to quickly create a Cobra application.`,
 
 			jobs := viper.GetStringSlice("jenkins.jobs")
 			if jobs == nil {
+				//TODO: 完善交互，如：loading……
+				fmt.Println("query jenkons job")
 				// 3. 本地未命中更新
-
 				cmdStr := "java -jar jenkins-cli.jar -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.user") + ":" + viper.GetString("jenkins.token") + " list-jobs"
 				res, err := shell.Exec(cmdStr)
 
@@ -82,9 +84,21 @@ to quickly create a Cobra application.`,
 			if len(list) == 1 {
 				job = list[0]
 			} else {
-				fmt.Println(list)
-				//TODO: 交互选择
-				log.Fatalf("can not found the job : %s", project)
+
+				prompt := promptui.Select{
+					Label: "Select Job",
+					Items: list,
+				}
+
+				//TODO: 支持忽略大小写匹配？
+				_, result, err := prompt.Run()
+
+				if err != nil {
+					fmt.Printf("Prompt failed %v\n", err)
+					return
+				}
+
+				job = result
 			}
 
 			var cmdStr string

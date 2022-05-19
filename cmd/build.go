@@ -135,7 +135,6 @@ to quickly create a Cobra application.`,
 				cmdStr = cmdStr + " -c"
 			}
 
-			fmt.Println(cmdStr)
 			res, err := shell.Exec(cmdStr)
 			if err != nil {
 				log.Fatalf("jenkins build %s err: %s", job, err)

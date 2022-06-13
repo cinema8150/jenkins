@@ -1,3 +1,8 @@
+TODO: 
+【】 默认分支
+【】 仅在变更时编译（距离上次编译成功有变动，需排查编译失败问题）
+
+
 "java -jar jenkins-cli.jar -s " + viper.GetString("jenkins.url") + " -webSocket -auth " + viper.GetString("jenkins.auth") + " build test_iOS_module_deploy_to_project -p project=" + project + " -p branch=" + branch + " -p modules_info=" + mdList
 
 

@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "./main.go",
-            "args": ["build","-p","Cyber","-b","develop/1.6.0"],
+            "args": ["build","iOS_Cybertron_intl_Demo","-f"],
             // "args": ["excute", "--branch", "feature/test_autotag", "--project", "https://gitlab.jiliguala.com/ios/jlgl/Cybertron-intl-ios"],
             // "args": ["scan", "--module", "SOEModule"]
         }

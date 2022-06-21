@@ -25,7 +25,26 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Args: cobra.MaximumNArgs(2), //最多1个自定义参数
+	Run: func(cmd *cobra.Command, args []string) {
+
+		if err := service.CheckJenkinsConfig(); err != nil {
+			log.Fatalln(err)
+		}
+
+		if len(args) > 0 {
+			project = args[0]
+		}
+		if len(args) > 1 {
+			branch = args[1]
+		}
+
+		if err := service.Build(project, branch, force, verbose); err != nil {
+			log.Fatalln(err)
+		}
+
+		//TODO: usage tip
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -43,7 +62,7 @@ func init() {
 }
 
 func initConfig() {
-	_, err := service.LoadConfig()
+	_, err := service.LoadConfig(AppName)
 	if err != nil {
 		//FIXME: log vs fmt
 		log.Fatalf("load config fatal: %s", err)

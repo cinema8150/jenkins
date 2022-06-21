@@ -15,6 +15,7 @@ var url string
 var user string
 var token string
 var jarfile string
+var fetch_interval int64
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
@@ -43,6 +44,11 @@ var configCmd = &cobra.Command{
 			viper.Set("jenkins.jar", jarfile)
 		}
 
+		if fetch_interval > 0 {
+			fmt.Printf("viper will set fetch interval: %d", fetch_interval)
+			viper.Set("jenkins.jobs.fetch_interval", fetch_interval)
+		}
+
 		err := viper.WriteConfig()
 		if err != nil {
 			fmt.Println(err)
@@ -60,6 +66,8 @@ func init() {
 	configCmd.Flags().StringVar(&token, "token", "", "input your token")
 
 	configCmd.Flags().StringVar(&jarfile, "jarfile", "", "input your jarfile")
+
+	configCmd.Flags().Int64Var(&fetch_interval, "interval", 86400, "cache update interval")
 
 	rootCmd.AddCommand(configCmd)
 

@@ -37,7 +37,8 @@ func Build(project string, branch string, custom bool, force bool, verbose bool)
 		job = result
 	}
 
-	config, err := GetJobConfig(job)
+	// TODO:
+	_, err = GetJobConfig(job)
 
 	var jarFile = viper.GetString("jenkins.jar")
 

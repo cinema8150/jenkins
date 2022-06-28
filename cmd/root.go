@@ -39,7 +39,7 @@ to quickly create a Cobra application.`,
 			branch = args[1]
 		}
 
-		if err := service.Build(project, branch, force, verbose); err != nil {
+		if err := service.Build(project, branch, custom, force, verbose); err != nil {
 			log.Fatalln(err)
 		}
 

@@ -96,3 +96,18 @@ func cacheUpdate(jarFile string) ([]string, error) {
 	}
 	return jobs, nil
 }
+
+type JobParamer struct {
+	Name    string
+	Type    string
+	Default string
+}
+
+type JobConfig struct {
+	Name string
+}
+
+func GetJobConfig(project string) (*JobConfig, error) {
+
+	return nil, errors.New(fmt.Sprintf("Unfound %s build config", project))
+}

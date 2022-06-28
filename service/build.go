@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Build(project string, branch string, force bool, verbose bool) error {
+func Build(project string, branch string, custom bool, force bool, verbose bool) error {
 
 	jobs, err := GetJob(project)
 	if err != nil {
@@ -36,6 +36,8 @@ func Build(project string, branch string, force bool, verbose bool) error {
 
 		job = result
 	}
+
+	config, err := GetJobConfig(job)
 
 	var jarFile = viper.GetString("jenkins.jar")
 

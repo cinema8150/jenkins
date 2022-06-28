@@ -14,6 +14,7 @@ import (
 var project string
 var branch string
 var verbose bool
+var custom bool //自定义模式打包，默认为false
 var force bool
 
 var AppName = "jenkins-cli"
@@ -41,7 +42,7 @@ to quickly create a Cobra application.`,
 			branch = args[1]
 		}
 
-		if err := service.Build(project, branch, force, verbose); err != nil {
+		if err := service.Build(project, branch, custom, force, verbose); err != nil {
 			log.Fatalln(err)
 		}
 	},
@@ -58,6 +59,8 @@ func init() {
 	buildCmd.Flags().BoolVarP(&force, "force", "f", false, "Not check for SCM changes before starting the build")
 
 	buildCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Prints out the console output of the build.")
+
+	buildCmd.Flags().BoolVarP(&custom, "custom", "c", false, "Custom every build param, default false")
 
 	rootCmd.AddCommand(buildCmd)
 
